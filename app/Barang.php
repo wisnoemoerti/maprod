@@ -15,10 +15,9 @@ class Barang extends Model
         DB::beginTransaction();
         try {
             $db = new Barang();
-            $db->nama = $request->nama;
+            $db->id_jenis = $request->id_jenis;
             $db->jenis_pack = $request->jenis_pack;
             $db->jumlah_stok = $request->jumlah_stok;
-            $db->harga = $request->harga;
 
 
             $tanggal = now()->format('d');
@@ -48,9 +47,7 @@ class Barang extends Model
         DB::beginTransaction();
         try {
             $db = Barang::find($request->id);
-            $db->nama =  $request->nama;
             $db->jumlah_stok =  $request->jumlah_stok;
-            $db->harga =  $request->harga;
             $db->save();
             DB::commit();
             $responseData = 'Data berhasil diubah';

@@ -19,6 +19,11 @@ class PageController extends Controller
     {
         return view('pages.barang.barang');
     }
+
+    public function pageJenis()
+    {
+        return view('pages.barang.jenis');
+    }
     
     public function pagePersediaan()
     {

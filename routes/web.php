@@ -25,6 +25,7 @@ Route::group(['middleware' => ['auth', 'role:superadministrator|owner']], functi
 });
 Route::group(['middleware' => ['auth', 'role:superadministrator|owner|karyawan']], function () {
 	Route::get('/barang', 'PageController@pageBarang');
+	Route::get('/jenis', 'PageController@pageJenis');
 	Route::get('/persediaan', 'PageController@pagePersediaan');
 	Route::get('/pembelian', 'PageController@pagePembelian');
 });
@@ -38,6 +39,7 @@ Route::group(['middleware' => ['auth', 'role:superadministrator|owner|karyawan|k
 // Table
 
 Route::get('/table/barang', 'BarangController@index')->name('tableBarang');
+Route::get('/table/jenis', 'JenisController@index')->name('tableJenis');
 Route::get('/table/persediaan', 'PersediaanController@index')->name('tablePersediaan');
 Route::get('/table/pembelian', 'PembelianController@index')->name('tablePembelian');
 Route::get('/table/penjualan', 'TransaksiController@index')->name('tablePenjualan');
@@ -48,6 +50,7 @@ Route::get('/modal','ModalController@modal')->name('modal');
 
 // Crud
 Route::match(['post','patch','delete'], '/barang/crud','BarangController@BarangCrud')->name('barang_crud');
+Route::match(['post','patch','delete'], '/jenis/crud','JenisController@JenisCrud')->name('jenis_crud');
 Route::match(['post','patch','delete'], '/persediaan/crud','PersediaanController@PersediaanCrud')->name('persediaan_crud');
 Route::match(['post','patch','delete'], '/pembelian/crud','PembelianController@PembelianCrud')->name('pembelian_crud');
 
