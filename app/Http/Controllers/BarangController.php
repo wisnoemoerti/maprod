@@ -10,35 +10,32 @@ use Illuminate\Support\Facades\View;
 
 //Define Model
 use App\Barang;
+use App\Batch;
+use App\Stock;
+use App\Transaction;
 use Illuminate\Support\Facades\DB;
 
 class BarangController extends Controller
 {
     public function index()
     {
-        $table = DB::table('barangs')
-            ->join('jenis', 'barangs.id_jenis', '=', 'jenis.id')
-            ->select('barangs.*', 'jenis.nama', 'jenis.harga');
+        $table = DB::table('products')
+            ->join('batches', 'products.id', '=', 'batches.product_id')
+            ->join('stocks', 'batches.id', '=', 'stocks.batch_id')
+            ->select('products.id', 'batches.id as batch_id', 'stocks.id as stock_id', 'products.name', 'products.price', 'products.pack_size', 'batches.batch_number', 'stocks.quantity')
+            ->get();
         $datatable = Datatables::of($table);
         $datatable->addIndexColumn();
         $datatable->addColumn('actions', function ($value) {
             $template = '
-            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Ubah Stok" class="btn btn-warning btn-circle stok-modal" data-table="tablePersediaan" data-jenis="stok" data-id="' . $value->id . '" data-url="' . route('modal') . '"><i class="fa fa-pen"></i></a>
-            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Ubah Barang" class="btn btn-success btn-circle edit-modal" data-table="tableBarang" data-jenis="barang" data-id="' . $value->id . '" data-url="' . route('modal') . '"><i class="fa fa-edit"></i></a>
-            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Hapus Barang" class="btn btn-danger btn-circle delete-modal" data-table="tableBarang" data-jenis="barang" data-tbl="tableBarang" data-url="' . route('barang_crud') . '" data-id="' . $value->id . '"><i class="fa fa-trash"></i></a>';
+            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Ubah Stok" class="btn btn-warning btn-circle stok-modal" data-table="tableBarang" data-jenis="stok" data-id="' . $value->batch_id . '" data-url="' . route('modal') . '"><i class="fa fa-pen"></i></a>
+            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Ubah Barang" class="btn btn-success btn-circle edit-modal" data-table="tableBarang" data-jenis="barang" data-id="' . $value->batch_id . '" data-url="' . route('modal') . '"><i class="fa fa-edit"></i></a>
+            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Hapus Barang" class="btn btn-danger btn-circle delete-modal" data-table="tableBarang" data-jenis="barang" data-tbl="tableBarang" data-url="' . route('barang_crud') . '" data-id="' . $value->batch_id . '"><i class="fa fa-trash"></i></a>';
             return $template;
         });
-        $datatable->editColumn('harga', function ($value) {
-            $harga = "Rp " . number_format($value->harga, 2, ',', '.');
-            return $harga;
-        });
-        $datatable->editColumn('jenis_pack', function ($value) {
-            $jenis_pack = $value->jenis_pack . " butir";
-            return $jenis_pack;
-        });
-        $datatable->editColumn('jumlah_stok', function ($value) {
-            $jumlah_stok = $value->jumlah_stok . " pack";
-            return $jumlah_stok;
+        $datatable->editColumn('price', function ($value) {
+            $price = "Rp " . number_format($value->price, 0, ',', '.');
+            return $price;
         });
         $datatable->rawColumns(['actions']);
         return $datatable->make(true);
@@ -49,20 +46,149 @@ class BarangController extends Controller
         if ($request->isMethod('post')) {
             switch ($request->metode) {
                 case 'tambah':
-                    return Barang::tambah($request);
+                    DB::beginTransaction();
+                    try {
+                        $productId = $request->input('product_id');
+                        $productionDate = $request->input('production_date');
+                        $quantity = $request->input('quantity');
+
+                        $tanggal = now()->format('d');
+                        $bulan = strtoupper(now()->format('M'));
+
+                        $nomor_urut = Batch::whereDate('created_at', today())->count() + 1;
+                        $nomor_urut_formatted = sprintf('%03d', $nomor_urut);
+
+                        $batchNumber = "{$tanggal}/{$bulan}/BATCH{$nomor_urut_formatted}";
+
+                        DB::transaction(function () use ($productId, $batchNumber, $productionDate, $quantity) {
+                            // Create a new batch
+                            $batch = Batch::create([
+                                'product_id' => $productId,
+                                'batch_number' => $batchNumber,
+                                'production_date' => $productionDate,
+                            ]);
+
+                            // Add stock for the new batch
+                            Stock::create([
+                                'batch_id' => $batch->id,
+                                'quantity' => $quantity,
+                            ]);
+
+                            // Create a transaction record for the stock addition
+                            Transaction::create([
+                                'batch_id' => $batch->id,
+                                'transaction_date' => now(),
+                                'quantity' => $quantity,
+                                'transaction_type' => 'IN',
+                            ]);
+                        });
+                        DB::commit();
+                        $responseData = 'Data barang berhasil disimpan';
+                        return response()->json(['message' => $responseData], 201);
+                    } catch (\Exception $ex) {
+                        DB::rollback();
+                        $responseData = $ex->getMessage();
+                        return response()->json(['message' => 'failed', 'data' => $responseData], 400);
+                    }
                     break;
                 case 'edit':
-                    return Barang::rubah($request);
+                    DB::beginTransaction();
+                    try {
+                        $productId = $request->input('product_id');
+                        $batchId = $request->input('id');
+                        $productionDate = $request->input('production_date');
+                        $quantity = $request->input('quantity');
+
+                        DB::transaction(function () use ($batchId, $productionDate, $productId, $quantity) {
+                            // Temukan batch berdasarkan batch_id
+                            $batch = Batch::find($batchId);
+                            // Update production date jika diperlukan
+                            $batch->update([
+                                'product_id' => $productId,
+                                'production_date' => $productionDate,
+                            ]);
+
+                            $stock = Stock::where('batch_id', $batchId)->first();
+                            $stock->update([
+                                'quantity' => $quantity,
+                            ]);
+
+                            $transaction = Transaction::where('batch_id', $batchId)->first();
+                            $transaction->update([
+                                'quantity' => $quantity,
+                            ]);
+                        });
+
+                        DB::commit();
+                        $responseData = 'Data barang berhasil disimpan';
+                        return response()->json(['message' => $responseData], 201);
+                    } catch (\Exception $ex) {
+                        DB::rollback();
+                        $responseData = $ex->getMessage();
+                        return response()->json(['message' => 'failed', 'data' => $responseData], 400);
+                    }
                     break;
             }
         } else if ($request->isMethod('delete')) {
-            return Barang::hapus($request);
+            DB::beginTransaction();
+            try {
+                Batch::find($request->id)->delete();
+                Stock::where('batch_id', $request->id)->delete();
+                Transaction::where('batch_id', $request->id)->delete();
+                DB::commit();
+                $responseData = 'Data berhasil dihapus';
+                return response()->json(['message' => $responseData, 'data' => $responseData], 201);
+            } catch (\Exception $ex) {
+                DB::rollback();
+                $responseData = $ex->getMessage();
+                return response()->json(['message' => 'failed', 'data' => $responseData], 400);
+            }
         }
     }
 
     public function updateStokBarang(Request $request)
     {
-        return Barang::updateStokBarang($request);
+        DB::beginTransaction();
+        try {
+            $productId = $request->input('product_id');
+            $batchId = $request->input('id');
+            $productionDate = $request->input('production_date');
+            $quantity = $request->input('quantity');
+            $type = $request->input('type');
+            DB::transaction(function () use ($batchId, $productionDate, $productId, $quantity, $type) {
+
+                $stock = Stock::where('batch_id', $batchId)->first();
+                if ($type == "Pengurangan") {
+                    $stock->update([
+                        'quantity' => $stock->quantity - $quantity,
+                    ]);
+                    Transaction::create([
+                        'batch_id' => $batchId,
+                        'transaction_date' => now(),
+                        'quantity' => $quantity,
+                        'transaction_type' => 'OUT',
+                    ]);
+                } else {
+                    $stock->update([
+                        'quantity' => $stock->quantity + $quantity,
+                    ]);
+                    Transaction::create([
+                        'batch_id' => $batchId,
+                        'transaction_date' => now(),
+                        'quantity' => $quantity,
+                        'transaction_type' => 'IN',
+                    ]);
+                }
+            });
+
+            DB::commit();
+            $responseData = 'Data barang berhasil disimpan';
+            return response()->json(['message' => $responseData], 201);
+        } catch (\Exception $ex) {
+            DB::rollback();
+            $responseData = $ex->getMessage();
+            return response()->json(['message' => 'failed', 'data' => $responseData], 400);
+        }
     }
 
     public function getBarang(Request $request)

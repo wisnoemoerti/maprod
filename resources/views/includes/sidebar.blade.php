@@ -30,15 +30,16 @@
         <div class="sidebar-heading">
             Gudang
         </div>
+        <li class="nav-item {{ request()->is('product') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('product') }}">
+                <i class="fas fa-fw fa-inbox"></i>
+                <span>Jenis Bakso</span></a>
+        </li>
+
         <li class="nav-item {{ request()->is('barang') ? 'active' : '' }}">
             <a class="nav-link" href="{{ url('barang') }}">
                 <i class="fas fa-fw fa-inbox"></i>
-                <span>Data Bakso</span></a>
-        </li>
-        <li class="nav-item {{ request()->is('jenis') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ url('jenis') }}">
-                <i class="fas fa-fw fa-inbox"></i>
-                <span>Jenis Bakso</span></a>
+                <span>Persediaan Bakso</span></a>
         </li>
     @endrole
     {{-- @role(['superadministrator', 'owner', 'karyawan'])
@@ -54,12 +55,12 @@
 
         <!-- Heading -->
         <div class="sidebar-heading">
-            Pembelian
+            Transaksi
         </div>
-        <li class="nav-item {{ request()->is('pembelian') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ url('pembelian') }}">
-                <i class="fas fa-fw fa-shopping-basket"></i>
-                <span>List Pengeluaran</span></a>
+        <li class="nav-item {{ request()->is('list-transaksi') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('/list-transaksi') }}">
+                <i class="fas fa-fw  fa-exchange-alt"></i>
+                <span>List Transaksi</span></a>
         </li>
     @endrole
     <!-- Divider -->
@@ -68,7 +69,7 @@
 
         <!-- Heading -->
         <div class="sidebar-heading">
-            Penjualan
+            Pesanan
         </div>
         <li class="nav-item {{ request()->is('penjualan') ? 'active' : '' }}">
             <a class="nav-link" href="{{ url('penjualan') }}">

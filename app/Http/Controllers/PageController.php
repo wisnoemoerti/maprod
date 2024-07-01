@@ -20,11 +20,11 @@ class PageController extends Controller
         return view('pages.barang.barang');
     }
 
-    public function pageJenis()
+    public function pageProduct()
     {
-        return view('pages.barang.jenis');
+        return view('pages.barang.product');
     }
-    
+
     public function pagePersediaan()
     {
         return view('pages.barang.persediaan');
@@ -43,5 +43,10 @@ class PageController extends Controller
     public function pageTransaksi()
     {
         return view('pages.penjualan.transaksi');
+    }
+
+    public function pageListTransaksi()
+    {
+        return view('pages.transaksi.transaksi');
     }
 }

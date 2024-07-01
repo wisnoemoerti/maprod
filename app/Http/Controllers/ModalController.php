@@ -6,13 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 
 use App\Barang;
+use App\Batch;
 use App\Jenis;
 use App\Persediaan;
 use App\Pembelian;
+use App\Product;
+use App\Stock;
 use App\Transaksi;
 use App\TransaksiDetail;
-
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class ModalController extends Controller
 {
@@ -37,14 +39,15 @@ class ModalController extends Controller
 
                 $modal_size = 'modal-lg';
 
-                $modal_title = $request->has('id') ? '<i class="fa fa-edit"></i> Ubah Barang' : '<i class="fa fa-plus"></i> Tambah Barang';
+                $modal_title = $request->has('id') ? '<i class="fa fa-edit"></i> Ubah Persediaan Bakso' : '<i class="fa fa-plus"></i> Tambah Persediaan Bakso';
 
-                $data = $request->has('id') ? Barang::find($request->id) : [];
-                $jenis = Jenis::all();
-
+                $data = $request->has('id') ? Batch::find($request->id) : [];
+                $jenis = Product::all();
+                $stock = Stock::where('batch_id', '=', $request->id)->first();
                 // Ensure $data is an array to merge with 'jenis'
                 $data = is_array($data) ? $data : $data->toArray();
                 $data['jenis'] = $jenis;
+                $data['stock'] = $stock;
 
                 $modal_body = View::make('modal_form.barang', $data)->render();
 
@@ -53,11 +56,11 @@ class ModalController extends Controller
                 <button type="submit" id="btn-save" class="btn btn-primary tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-url="' . $url . '" data-tbl="' . $table . '" data-action ="' . $action . '" >Save</button>
                 <button type="button" class="btn btn-secondary tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Close</button>';
                 break;
-            case 'jenis':
+            case 'product':
 
-                $url = route('jenis_crud');
+                $url = route('product_crud');
 
-                $table = 'tableJenis';
+                $table = 'tableProduct';
 
                 $action = $request->has('id') ? 'edit' : 'add';
 
@@ -65,9 +68,9 @@ class ModalController extends Controller
 
                 $modal_title = $request->has('id') ? '<i class="fa fa-edit"></i> Ubah Jenis' : '<i class="fa fa-plus"></i> Tambah Jenis';
 
-                $data = $request->has('id') ? Jenis::find($request->id) : [];
+                $data = $request->has('id') ? Product::find($request->id) : [];
 
-                $modal_body = View::make('modal_form.jenis', $data)->render();
+                $modal_body = View::make('modal_form.product', $data)->render();
 
                 $modal_footer = '
                 <button type="submit" id="btn-save" class="btn btn-primary tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-url="' . $url . '" data-tbl="' . $table . '" data-action ="' . $action . '" >Save</button>
@@ -83,9 +86,9 @@ class ModalController extends Controller
 
                 $modal_size = 'modal-lg';
 
-                $modal_title = $request->has('id') ? '<i class="fa fa-edit"></i> Update Stok Barang' : '<i class="fa fa-plus"></i> Tambah Barang';
+                $modal_title = $request->has('id') ? '<i class="fa fa-edit"></i> Update Stok Persediaan Barang' : '<i class="fa fa-plus"></i> Tambah Barang';
 
-                $data = $request->has('id') ? Barang::find($request->id) : [];
+                $data = $request->has('id') ? Batch::find($request->id) : [];
 
                 $modal_body = View::make('modal_form.updateStok', $data)->render();
 

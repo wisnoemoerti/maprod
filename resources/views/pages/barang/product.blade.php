@@ -1,30 +1,28 @@
 @extends('template')
 @section('title')
-    MAPROD | Persediaan Bakso
+    MAPROD | Data Jenis Bakso
 @endsection
 @section('content')
     <!-- Page Heading -->
-    <h1 class="h3 mb-2 text-gray-800">Data Manajement Persediaan Bakso</h1>
-    <p class="mb-4">Ini adalah data manajement Persediaan Bakso.</p>
+    <h1 class="h3 mb-2 text-gray-800">Data Jenis Bakso</h1>
+    <p class="mb-4">Ini adalah data Jenis Bakso.</p>
 
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary"> Persediaan Bakso</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Data Jenis Bakso</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered global-table" id="tableBarang" width="100%" cellspacing="0">
+                <table class="table table-bordered global-table" id="tableProduct" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th width="5%">No</th>
                             <th width="12%"><a href="javascript:void(0);" class="btn btn-primary btn-circle add-modal"
-                                    data-jenis="barang" data-url="{{ route('modal') }}"><i class="fa fa-plus"></i></a></th>
+                                    data-jenis="product" data-url="{{ route('modal') }}"><i class="fa fa-plus"></i></a></th>
                             <th>Nama</th>
                             <th>Ukuran Pack</th>
-                            <th>Stok</th>
                             <th>Harga</th>
-                            <th>Batch</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,13 +45,13 @@
 @section('js')
     <script>
         $(document).ready(function() {
-            $('#tableBarang').DataTable({
+            $('#tableProduct').DataTable({
                 ordering: false,
                 responsive: true,
                 processing: true,
                 serverSide: true,
                 saveState: true,
-                ajax: '{{ route('tableBarang') }}',
+                ajax: '{{ route('tableProduct') }}',
                 columns: [{
                         data: 'DT_RowIndex',
                         searchable: false
@@ -71,17 +69,10 @@
                         name: 'pack_size'
                     },
                     {
-                        data: 'quantity',
-                        name: 'quantity'
-                    },
-                    {
                         data: 'price',
                         name: 'price'
                     },
-                    {
-                        data: 'batch_number',
-                        name: 'batch_number'
-                    },
+
                 ],
                 language: {
                     searchPlaceholder: 'Search...',

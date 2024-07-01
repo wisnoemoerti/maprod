@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('auth.login');
+	return view('auth.login');
 });
 
 Auth::routes();
@@ -22,10 +22,11 @@ Auth::routes();
 // Page
 Route::group(['middleware' => ['auth', 'role:superadministrator|owner']], function () {
 	Route::get('/dashboard', 'PageController@pageDashboard');
+	Route::get('/list-transaksi', 'PageController@pageListTransaksi');
 });
 Route::group(['middleware' => ['auth', 'role:superadministrator|owner|karyawan']], function () {
 	Route::get('/barang', 'PageController@pageBarang');
-	Route::get('/jenis', 'PageController@pageJenis');
+	Route::get('/product', 'PageController@pageProduct');
 	Route::get('/persediaan', 'PageController@pagePersediaan');
 	Route::get('/pembelian', 'PageController@pagePembelian');
 });
@@ -39,32 +40,33 @@ Route::group(['middleware' => ['auth', 'role:superadministrator|owner|karyawan|k
 // Table
 
 Route::get('/table/barang', 'BarangController@index')->name('tableBarang');
-Route::get('/table/jenis', 'JenisController@index')->name('tableJenis');
+Route::get('/table/product', 'ProductController@index')->name('tableProduct');
 Route::get('/table/persediaan', 'PersediaanController@index')->name('tablePersediaan');
 Route::get('/table/pembelian', 'PembelianController@index')->name('tablePembelian');
 Route::get('/table/penjualan', 'TransaksiController@index')->name('tablePenjualan');
+Route::get('/table/listTransaction', 'TransaksiController@listTransaction')->name('tablelistTransaction');
 
 // Modal
 
-Route::get('/modal','ModalController@modal')->name('modal');
+Route::get('/modal', 'ModalController@modal')->name('modal');
 
 // Crud
-Route::match(['post','patch','delete'], '/barang/crud','BarangController@BarangCrud')->name('barang_crud');
-Route::match(['post','patch','delete'], '/jenis/crud','JenisController@JenisCrud')->name('jenis_crud');
-Route::match(['post','patch','delete'], '/persediaan/crud','PersediaanController@PersediaanCrud')->name('persediaan_crud');
-Route::match(['post','patch','delete'], '/pembelian/crud','PembelianController@PembelianCrud')->name('pembelian_crud');
+Route::match(['post', 'patch', 'delete'], '/barang/crud', 'BarangController@BarangCrud')->name('barang_crud');
+Route::match(['post', 'patch', 'delete'], '/product/crud', 'ProductController@ProductCrud')->name('product_crud');
+Route::match(['post', 'patch', 'delete'], '/persediaan/crud', 'PersediaanController@PersediaanCrud')->name('persediaan_crud');
+Route::match(['post', 'patch', 'delete'], '/pembelian/crud', 'PembelianController@PembelianCrud')->name('pembelian_crud');
 
 // Post 
 Route::post('/post/transaction', 'TransaksiController@postTransaction');
 
 // Grafik
 
-Route::get('/grafik/laba-rugi','DashboardController@LabaRugi')->name('LabaRugi');
-Route::get('/grafik/barang','DashboardController@Barang')->name('Barang');
+Route::get('/grafik/laba-rugi', 'DashboardController@LabaRugi')->name('LabaRugi');
+Route::get('/grafik/barang', 'DashboardController@Barang')->name('Barang');
 
 // Extends Functionn
 
 Route::get('/getBarang', 'BarangController@getBarang');
-Route::match(['post','patch','delete'], '/barang/update-stok','BarangController@updateStokBarang')->name('updateStokBarang');
-Route::match(['post','patch','delete'], '/persediaan/update-stok','PersediaanController@updateStokPersediaan')->name('updateStokPersediaan');
+Route::match(['post', 'patch', 'delete'], '/barang/update-stok', 'BarangController@updateStokBarang')->name('updateStokBarang');
+Route::match(['post', 'patch', 'delete'], '/persediaan/update-stok', 'PersediaanController@updateStokPersediaan')->name('updateStokPersediaan');
 Route::get('/struk', 'TransaksiController@struk');
