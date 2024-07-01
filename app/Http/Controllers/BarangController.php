@@ -10,12 +10,16 @@ use Illuminate\Support\Facades\View;
 
 //Define Model
 use App\Barang;
+use Illuminate\Support\Facades\DB;
 
 class BarangController extends Controller
 {
     public function index()
     {
-        $datatable = Datatables::of(Barang::all());
+        $table = DB::table('barangs')
+            ->join('jenis', 'barangs.id_jenis', '=', 'jenis.id')
+            ->select('barangs.*', 'jenis.nama', 'jenis.harga');
+        $datatable = Datatables::of($table);
         $datatable->addIndexColumn();
         $datatable->addColumn('actions', function ($value) {
             $template = '

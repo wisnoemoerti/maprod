@@ -35,6 +35,11 @@
                 <i class="fas fa-fw fa-inbox"></i>
                 <span>Data Bakso</span></a>
         </li>
+        <li class="nav-item {{ request()->is('jenis') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('jenis') }}">
+                <i class="fas fa-fw fa-inbox"></i>
+                <span>Jenis Bakso</span></a>
+        </li>
     @endrole
     {{-- @role(['superadministrator', 'owner', 'karyawan'])
       <li class="nav-item {{ request()->is('persediaan') ? 'active' : '' }}">
