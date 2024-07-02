@@ -29,17 +29,16 @@
                 </table>
 
                 @component('components.modal')
-                @slot('id_modal', 'myModal')
-                @slot('id_form', 'form')
-                @slot('size_modal', 'modal_size')
-                @slot('title_modal', 'modal_title')
-                @slot('body_modal', 'modal_body')
-                @slot('footer_modal', 'modal_footer')
+                    @slot('id_modal', 'myModal')
+                    @slot('id_form', 'form')
+                    @slot('size_modal', 'modal_size')
+                    @slot('title_modal', 'modal_title')
+                    @slot('body_modal', 'modal_body')
+                    @slot('footer_modal', 'modal_footer')
                 @endcomponent
-                </div>
+            </div>
+        </div>
     </div>
-  </div>
-
 @endsection
 @section('js')
     <script>
@@ -56,20 +55,20 @@
                         searchable: false
                     },
                     {
-                        data: 'tanggal_transaksi',
-                        name: 'tanggal_transaksi'
+                        data: 'transaction_date',
+                        name: 'transaction_date'
                     },
                     {
-                        data: 'nama_pembeli',
-                        name: 'nama_pembeli'
+                        data: 'buyer_name',
+                        name: 'buyer_name'
                     },
                     {
-                        data: 'total_pembayaran',
-                        name: 'total_pembayaran'
+                        data: 'total_payment',
+                        name: 'total_payment'
                     },
                     {
-                        data: 'keterangan',
-                        name: 'keterangan'
+                        data: 'description',
+                        name: 'description'
                     },
                     {
                         data: 'actions',
@@ -121,6 +120,5 @@
                 },
             });
         });
-
     </script>
 @endsection

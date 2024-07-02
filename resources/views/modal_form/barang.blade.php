@@ -10,7 +10,7 @@
                 @foreach ($jenis as $item)
                     <option value="{{ $item->id }}"
                         {{ isset($product_id) && $product_id == $item->id ? 'selected' : '' }}>
-                        {{ $item->name }}
+                        {{ $item->name }} ISI ({{ $item->pack_size }})
                     </option>
                 @endforeach
             </select>

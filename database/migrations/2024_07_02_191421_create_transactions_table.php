@@ -15,11 +15,12 @@ class CreateTransactionsTable extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->integer('transaction_details_id')->nullable();
             $table->integer('batch_id');
             $table->date('transaction_date');
             $table->integer('quantity');
-            $table->integer('price_at_buy');
-            $table->enum('transaction_type', ['IN', 'OUT']);
+            $table->integer('price_at_buy')->nullable();
+            $table->enum('transaction_type', ['IN', 'OUT', 'PURCHASED']);
             $table->timestamps();
         });
     }

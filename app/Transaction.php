@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
 {
-    protected $fillable = ['batch_id', 'transaction_date', 'quantity', 'transaction_type'];
+    protected $fillable = ['transaction_details_id', 'batch_id', 'transaction_date', 'quantity', 'transaction_type', 'price_at_buy'];
 
     public function batch()
     {

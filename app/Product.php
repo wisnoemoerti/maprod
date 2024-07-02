@@ -41,7 +41,7 @@ class Product extends Model
         DB::beginTransaction();
         try {
             $db = Product::find($request->id);
-            $db->name = $request->name;
+            // $db->name = $request->name;
             $db->price = $request->price;
             $db->pack_size = $request->pack_size;
             $db->save();

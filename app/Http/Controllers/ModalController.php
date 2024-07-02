@@ -167,11 +167,12 @@ class ModalController extends Controller
 
                 $modal_title = '<i class="fa fa-info"></i> Info Transaksi';
 
-                $dataTransaksi = DB::table('transaksis')->where('transaksis.id', '=', $request->id)->get();
-                $dataListBarang = DB::table('transaksi_details')
-                    ->join('barangs', 'transaksi_details.id_barang', '=', 'barangs.id')
-                    ->select('transaksi_details.id_barang', 'transaksi_details.id_transaksi', 'transaksi_details.jumlah_barang', 'transaksi_details.harga', 'barangs.nama')
-                    ->where('transaksi_details.id_transaksi', '=', $request->id)
+                $dataTransaksi = DB::table('transaction_details')->where('transaction_details.id', '=', $request->id)->get();
+                $dataListBarang = DB::table('transactions')
+                    ->join('batches', 'transactions.batch_id', '=', 'batches.id')
+                    ->join('products', 'batches.product_id', '=', 'products.id')
+                    ->select('transactions.transaction_details_id', 'transactions.quantity as jumlah_barang', 'transactions.price_at_buy as harga', 'products.name as nama', 'products.pack_size')
+                    ->where('transactions.transaction_details_id', '=', $request->id)
                     ->get();
                 // $table = DB::table('transaksis')->join('transaksi_details', 'transaksis.id', '=', 'transaksi_details.id_transaksi')->get();
 

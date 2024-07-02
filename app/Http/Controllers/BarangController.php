@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\View;
 //Define Model
 use App\Barang;
 use App\Batch;
+use App\Product;
 use App\Stock;
 use App\Transaction;
 use Illuminate\Support\Facades\DB;
@@ -193,30 +194,42 @@ class BarangController extends Controller
 
     public function getBarang(Request $request)
     {
-        $data = Barang::select('id', 'nama', 'jumlah_stok', 'harga')->where('nama', $request->barang)
-            ->orWhere('nama', 'like', '%' . $request->barang . '%')->get();
+        $data = Product::with('batches.stock')
+            ->select('id', 'name', 'pack_size', 'price')
+            ->get()
+            ->filter(function ($product) {
+                $totalStock = $product->batches->sum(function ($batch) {
+                    return $batch->stock ? $batch->stock->quantity : 0;
+                });
+                return $totalStock > 0;
+            })
+            ->sortBy('name');
 
         $html = '';
         foreach ($data as $key => $value) {
+            $totalStock = $value->batches->sum(function ($batch) {
+                return $batch->stock ? $batch->stock->quantity : 0;
+            });
+
             $html .= '
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-              <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                  <div class="col mr-2">
-                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">' . $value->nama . '</div>
-                    <div class="h5 mb-0 text-xs font-weight-bold text-gray-800">Rp. ' . number_format($value->harga, 2, ',', '.') . '</div>
-                    <div class="text-xs font-weight-bold text-primary mt-2"> Stok: ' . $value->jumlah_stok . '</div>
-                  </div>
-                  <div class="col-auto">
-                    <button class="btn btn-success btn-circle tambah-barang" data-id="' . $value->id . '" data-harga="' . $value->harga . '" data-nama="' . $value->nama . '">
-                        <i class="fas fa-plus"></i>
-                      </button>
-                  </div>
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">' . $value->name . ' ISI (' . $value->pack_size . ')</div>
+                        <div class="h5 mb-0 text-xs font-weight-bold text-gray-800">Rp. ' . number_format($value->price, 2, ',', '.') . '</div>
+                        <div class="text-xs font-weight-bold text-primary mt-2"> Stok: ' . $totalStock . '</div>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-success btn-circle tambah-barang" data-id="' . $value->id . '" data-harga="' . $value->price . '" data-stock="' . $totalStock . '" data-nama="' . $value->name . ' ISI (' . $value->pack_size . ') ">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>';
+                </div>
+            </div>';
         }
         return response()->json($html);
     }
