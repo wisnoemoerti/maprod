@@ -1,0 +1,117 @@
+Table users {
+  id integer [primary key]
+  name varchar
+  email varchar [unique]
+  email_verified_at timestamp [null]
+  password varchar
+  remember_token varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table roles {
+  id integer [primary key]
+  name varchar [unique]
+  display_name varchar [null]
+  description varchar [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table permissions {
+  id integer [primary key]
+  name varchar [unique]
+  display_name varchar [null]
+  description varchar [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table role_user {
+  role_id integer
+  user_id integer
+  user_type varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table permission_user {
+  permission_id integer
+  user_id integer
+  user_type varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table permission_role {
+  permission_id integer
+  role_id integer
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table products {
+  id integer [primary key]
+  name varchar
+  price integer
+  pack_size integer
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table batches {
+  id integer [primary key]
+  product_id integer
+  batch_number varchar
+  production_date date
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table stocks {
+  id integer [primary key]
+  batch_id integer
+  quantity integer
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table transaction_details {
+  id integer [primary key]
+  buyer_name varchar [null]
+  description varchar [null]
+  transaction_date timestamp [null]
+  total_payment bigint [null]
+  paid bigint [null]
+  return bigint [null]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null]
+}
+
+Table transactions {
+  id integer [primary key]
+  transaction_details_id integer [null]
+  batch_id integer
+  transaction_date date
+  quantity integer
+  price_at_buy integer [null]
+  transaction_type varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: role_user.role_id > roles.id
+Ref: role_user.user_id > users.id
+
+Ref: permission_user.permission_id > permissions.id
+Ref: permission_user.user_id > users.id
+
+Ref: permission_role.permission_id > permissions.id
+Ref: permission_role.role_id > roles.id
+
+Ref: batches.product_id > products.id
+Ref: stocks.batch_id > batches.id
+
+Ref: transactions.transaction_details_id > transaction_details.id
+Ref: transactions.batch_id > batches.id

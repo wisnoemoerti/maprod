@@ -164,7 +164,7 @@ class TransaksiController extends Controller
             }
             DB::commit();
             $responseData = 'Data barang berhasil disimpan';
-            return response()->json(['message' => $responseData, 'data' => $responseData], 201);
+            return response()->json(['message' => $responseData, 'data' => $db], 201);
         } catch (\Exception $ex) {
             DB::rollback();
             $responseData = $ex->getMessage();
@@ -175,11 +175,13 @@ class TransaksiController extends Controller
 
     public function struk()
     {
-        $dataTransaksi = DB::table('transaksis')->orderBy('created_at', 'desc')->first();
-        $dataListBarang = DB::table('transaksi_details')
-            ->join('barangs', 'transaksi_details.id_barang', '=', 'barangs.id')
-            ->select('transaksi_details.id_barang', 'transaksi_details.id_transaksi', 'transaksi_details.jumlah_barang', 'transaksi_details.harga', 'barangs.nama')
-            ->where('transaksi_details.id_transaksi', '=', $dataTransaksi->id)
+        $dataTransaksi = DB::table('transaction_details')->orderBy('created_at', 'desc')->first();
+
+        $dataListBarang = DB::table('transactions')
+            ->join('batches', 'transactions.batch_id', '=', 'batches.id')
+            ->join('products', 'batches.product_id', '=', 'products.id')
+            ->select('transactions.quantity', 'transactions.price_at_buy', 'products.name')
+            ->where('transactions.transaction_details_id', '=', $dataTransaksi->id)
             ->get();
         return view('pages.penjualan.struk', ['dataTransaksi' => $dataTransaksi, 'dataListBarang' => $dataListBarang]);
     }
