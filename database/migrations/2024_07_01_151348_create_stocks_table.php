@@ -17,6 +17,7 @@ class CreateStocksTable extends Migration
             $table->id();
             $table->integer('batch_id');
             $table->integer('quantity');
+            $table->dateTime('expired_at');
             $table->timestamps();
         });
     }

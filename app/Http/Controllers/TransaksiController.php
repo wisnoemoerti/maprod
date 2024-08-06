@@ -72,37 +72,26 @@ class TransaksiController extends Controller
 
     public function postTransaction(Request $request)
     {
-        // dd($request->all());
-
-        // $collect = [];
-
-        // foreach ($param['barang'] as $id => $item) {
-        //     $barang['id'] = $id;
-        //     $barang['qty'] = $item['qty'];
-        //     $barang['harga'] = $item['harga'];
-
-        //     array_push($collect, $barang);
-        // }
-
-        // dd($collect);
         DB::beginTransaction();
         try {
             $db = new TransactionDetail();
 
-            $db->buyer_name       = $request->nama;
-            $db->description         = $request->keterangan;
-            $db->transaction_date  = Carbon::now();
-            $db->total_payment   = $request->total_pembayaran;
-            $db->paid              = $request->bayar;
-            $db->return          = $request->kembalian;
+            $db->buyer_name = $request->nama;
+            $db->description = $request->keterangan;
+            $db->transaction_date = Carbon::now();
+            $db->total_payment = $request->total_pembayaran;
+            $db->paid = $request->bayar;
+            $db->return = $request->kembalian;
             $saved = $db->save();
+
             if ($saved) {
                 foreach ($request->barang as $id => $item) {
                     $remainingQuantity = $item['qty'];
 
                     $batches = Batch::where('product_id', $id)
                         ->whereHas('stock', function ($query) {
-                            $query->where('quantity', '>', 0);
+                            $query->where('quantity', '>', 0)
+                                ->where('expired_at', '>', Carbon::now());
                         })
                         ->orderBy('production_date')
                         ->with('stock')
@@ -147,21 +136,9 @@ class TransaksiController extends Controller
                             $remainingQuantity -= $currentBatchQuantity;
                         }
                     }
-
-
-                    // $db2 = new TransaksiDetail();
-                    // $db2->id_barang       = $id;
-                    // $db2->id_transaksi         = $db->id;
-                    // $db2->jumlah_barang  = $item['qty'];
-                    // $db2->harga   = $item['harga'];
-                    // $db2->total_harga   = $item['harga'];
-                    // $save = $db2->save();
-
-                    // $db3 = Barang::find($id);
-                    // $db3->jumlah_stok = $db3->jumlah_stok - $item['qty'];
-                    // $db3->save();
                 }
             }
+
             DB::commit();
             $responseData = 'Data barang berhasil disimpan';
             return response()->json(['message' => $responseData, 'data' => $db], 201);

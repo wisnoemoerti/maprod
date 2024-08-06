@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stock extends Model
 {
-    protected $fillable = ['batch_id', 'quantity'];
+    protected $fillable = ['batch_id', 'quantity', 'expired_at'];
 
     public function batch()
     {

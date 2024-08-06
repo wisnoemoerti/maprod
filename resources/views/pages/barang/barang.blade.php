@@ -23,6 +23,7 @@
                             <th>Nama</th>
                             <th>Ukuran Pack</th>
                             <th>Stok</th>
+                            <th>Tanggal Kadaluarasa</th>
                             <th>Harga</th>
                             <th>Batch</th>
                         </tr>
@@ -75,6 +76,16 @@
                         name: 'quantity'
                     },
                     {
+                        data: 'expired_at',
+                        name: 'expired_at',
+                        render: function(data, type, row) {
+                            if (type === 'display' || type === 'filter') {
+                                return formatDate(new Date(data));
+                            }
+                            return data;
+                        }
+                    },
+                    {
                         data: 'price',
                         name: 'price'
                     },
@@ -90,5 +101,18 @@
                 }
             });
         });
+
+        function formatDate(date) {
+            const months = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+
+            const day = date.getDate();
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+
+            return `${day} ${month} ${year}`;
+        }
     </script>
 @endsection

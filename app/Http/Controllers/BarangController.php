@@ -14,6 +14,7 @@ use App\Batch;
 use App\Product;
 use App\Stock;
 use App\Transaction;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class BarangController extends Controller
@@ -23,7 +24,7 @@ class BarangController extends Controller
         $table = DB::table('products')
             ->join('batches', 'products.id', '=', 'batches.product_id')
             ->join('stocks', 'batches.id', '=', 'stocks.batch_id')
-            ->select('products.id', 'batches.id as batch_id', 'stocks.id as stock_id', 'products.name', 'products.price', 'products.pack_size', 'batches.batch_number', 'stocks.quantity')
+            ->select('products.id', 'batches.id as batch_id', 'stocks.id as stock_id', 'products.name', 'products.price', 'products.pack_size', 'batches.batch_number', 'stocks.quantity', 'stocks.expired_at')
             ->get();
         $datatable = Datatables::of($table);
         $datatable->addIndexColumn();
@@ -73,6 +74,7 @@ class BarangController extends Controller
                             Stock::create([
                                 'batch_id' => $batch->id,
                                 'quantity' => $quantity,
+                                'expired_at' =>  \Carbon\Carbon::parse($productionDate)->addDays(30),  // Set expired_at to production date plus 30 days
                             ]);
 
                             // Create a transaction record for the stock addition
@@ -194,16 +196,22 @@ class BarangController extends Controller
 
     public function getBarang(Request $request)
     {
-        $data = Product::with('batches.stock')
+        $data = Product::with(['batches' => function ($query) {
+            $query->whereHas('stock', function ($stockQuery) {
+                $stockQuery->where('quantity', '>', 0)
+                    ->where('expired_at', '>', Carbon::now());
+            });
+        }])
             ->select('id', 'name', 'pack_size', 'price')
             ->get()
             ->filter(function ($product) {
                 $totalStock = $product->batches->sum(function ($batch) {
-                    return $batch->stock ? $batch->stock->quantity : 0;
+                    return $batch->stock ? $batch->stock->sum('quantity') : 0;
                 });
                 return $totalStock > 0;
             })
             ->sortBy('name');
+
 
         $html = '';
         foreach ($data as $key => $value) {
